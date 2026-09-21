@@ -107,15 +107,4 @@ jobs:
       - name: List downloaded files
         run: ls -la downloaded-build/
 
-  deploy:
-    name: Deploy to Render
-    runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests, build-frontend]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Trigger Backend Deploy
-        run: curl -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}"
-
-      - name: Trigger Frontend Deploy
-        run: curl -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}"
+  

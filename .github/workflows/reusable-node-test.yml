@@ -1,0 +1,42 @@
+name: Reusable Node Test
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Folder containing the Node project (e.g. backend or frontend)"
+        required: true
+        type: string
+      node-versions:
+        description: "JSON array of Node versions to test against, e.g. '[18,20,22]'"
+        required: false
+        type: string
+        default: '[18, 20, 22]'
+
+jobs:
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ${{ fromJSON(inputs.node-versions) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working-directory }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ${{ inputs.working-directory }}
+        run: npm test

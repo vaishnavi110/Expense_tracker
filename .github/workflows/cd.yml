@@ -21,3 +21,14 @@ jobs:
 
       - name: Trigger Frontend Deploy
         run: curl -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}"
+      
+      - name: Notify Slack on deploy failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -sS -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\":rotating_light: *Production deploy failed* in ${REPO}\n${RUN_URL}\"}" \
+            "$SLACK_WEBHOOK_URL"
